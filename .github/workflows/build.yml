@@ -1,0 +1,74 @@
+name: Build APK
+
+# Builds a signed release APK on every v* tag push and publishes it as a
+# GitHub Release. Can also be triggered manually (Actions -> Build APK).
+# Tag format: v1.2.3        -> versionName 1.2.3,  versionCode = commit count
+#              v1.2.3+18    -> versionName 1.2.3,  versionCode 18
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_B64: ${{ secrets.DEVELVPN_KEYSTORE_B64 }}
+      KEYSTORE_STORE_PASSWORD: ${{ secrets.DEVELVPN_STORE_PASSWORD }}
+      KEYSTORE_KEY_PASSWORD: ${{ secrets.DEVELVPN_KEY_PASSWORD }}
+      KEYSTORE_KEY_ALIAS: ${{ secrets.DEVELVPN_KEY_ALIAS }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.7
+          channel: stable
+          cache: true
+
+      - name: Restore release signing key (if secrets are configured)
+        if: env.KEYSTORE_B64 != ''
+        working-directory: android
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > app/develvpn-release.jks
+          cat > key.properties <<EOF
+          storePassword=$KEYSTORE_STORE_PASSWORD
+          keyPassword=$KEYSTORE_KEY_PASSWORD
+          keyAlias=$KEYSTORE_KEY_ALIAS
+          storeFile=develvpn-release.jks
+          EOF
+
+      - name: Build release APK
+        run: |
+          BUILD_NAME="${GITHUB_REF_NAME#v}"
+          BUILD_NUMBER="${BUILD_NAME#*+}"
+          if [ "$BUILD_NUMBER" = "$BUILD_NAME" ]; then
+            BUILD_NUMBER=$(git rev-list --count HEAD)
+          else
+            BUILD_NAME="${BUILD_NAME%+*}"
+          fi
+          echo "Building versionName=$BUILD_NAME versionCode=$BUILD_NUMBER"
+          flutter build apk --release --build-name="$BUILD_NAME" --build-number="$BUILD_NUMBER"
+
+      - name: Rename APK
+        run: cp build/app/outputs/flutter-apk/app-release.apk "develvpn-release-${GITHUB_REF_NAME}.apk"
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "develvpn-release-${GITHUB_REF_NAME}.apk" \
+            --title "DevelVpn $GITHUB_REF_NAME" \
+            --generate-notes

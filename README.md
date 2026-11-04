@@ -1,5 +1,11 @@
 # DevelVpn
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Android-3DDC84?logo=android&logoColor=white)](#)
+[![Made with Flutter](https://img.shields.io/badge/made%20with-Flutter-02569B?logo=flutter&logoColor=white)](#)
+[![Build APK](https://github.com/Aliev-king/DevelVpn/actions/workflows/build.yml/badge.svg)](../../actions/workflows/build.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Aliev-king/DevelVpn)](../../releases/latest)
+
 A lightweight, open-source VPN client for Android built with Flutter and the Xray core.
 Imports VLESS/VMess/Trojan subscriptions (including base64 and Happ-style links),
 connects through Reality / Vision / gRPC / TLS and keeps your traffic safe.
