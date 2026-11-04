@@ -51,18 +51,30 @@ jobs:
 
       - name: Build release APK
         run: |
-          BUILD_NAME="${GITHUB_REF_NAME#v}"
-          BUILD_NUMBER="${BUILD_NAME#*+}"
-          if [ "$BUILD_NUMBER" = "$BUILD_NAME" ]; then
-            BUILD_NUMBER=$(git rev-list --count HEAD)
+          if [[ "$GITHUB_REF_NAME" == v* ]]; then
+            BUILD_NAME="${GITHUB_REF_NAME#v}"
+            BUILD_NUMBER="${BUILD_NAME#*+}"
+            if [ "$BUILD_NUMBER" = "$BUILD_NAME" ]; then
+              BUILD_NUMBER=$(git rev-list --count HEAD)
+            else
+              BUILD_NAME="${BUILD_NAME%+*}"
+            fi
+            echo "Building versionName=$BUILD_NAME versionCode=$BUILD_NUMBER"
+            flutter build apk --release --build-name="$BUILD_NAME" --build-number="$BUILD_NUMBER"
           else
-            BUILD_NAME="${BUILD_NAME%+*}"
+            echo "Manual run without a tag: using version from pubspec.yaml"
+            flutter build apk --release
           fi
-          echo "Building versionName=$BUILD_NAME versionCode=$BUILD_NUMBER"
-          flutter build apk --release --build-name="$BUILD_NAME" --build-number="$BUILD_NUMBER"
 
       - name: Rename APK
         run: cp build/app/outputs/flutter-apk/app-release.apk "develvpn-release-${GITHUB_REF_NAME}.apk"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: develvpn-apk
+          path: develvpn-release-*.apk
+          if-no-files-found: error
 
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
