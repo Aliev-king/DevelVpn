@@ -1,3 +1,7 @@
+<div align="center">
+  <img src=".github/assets/banner.png" alt="DevelVpn — Your VPN, your rules" width="100%" />
+</div>
+
 # DevelVpn
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
