@@ -7,6 +7,15 @@ connects through Reality / Vision / gRPC / TLS and keeps your traffic safe.
 > **Disclaimer** — This project is provided for personal and educational use.
 > You are responsible for complying with the laws of your country.
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/home.png" width="210" alt="Home — gem connect button, status, server plate"/>
+  <img src="screenshots/servers.png" width="210" alt="Servers — search, sort, favorites"/>
+  <img src="screenshots/settings.png" width="210" alt="Settings — auto-switch, kill switch, tunnel options"/>
+  <img src="screenshots/account.png" width="210" alt="Account — profile and overall stats"/>
+</p>
+
 ## Features
 
 - **Subscriptions**: import via link, clipboard, QR code or manual vless entry;
